@@ -142,7 +142,11 @@ export const getTypeFields = (
         const propertySchema = properties[propertyName];
         const type = jsonSchemaTypeToGraphQL(
           title,
-          propertySchema,
+          propertySchema &&
+            Object.keys(propertySchema).length !== 0 &&
+            Object.keys(propertySchema).includes('type')
+            ? propertySchema
+            : { type: 'object', properties: {} },
           propertyName,
           isInputType,
           gqlTypes,
@@ -270,7 +274,11 @@ export const mapParametersToFields = (
   return parameters.reduce((res: GraphQLFieldConfigArgumentMap, param) => {
     const type = jsonSchemaTypeToGraphQL(
       `param_${typeName}`,
-      param.jsonSchema,
+      param.jsonSchema &&
+        Object.keys(param.jsonSchema).length !== 0 &&
+        Object.keys(param.jsonSchema).includes('type')
+        ? param.jsonSchema
+        : { type: 'object', properties: {} },
       param.name,
       true,
       gqlTypes,

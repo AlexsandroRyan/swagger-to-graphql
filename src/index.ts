@@ -54,9 +54,14 @@ const getFields = <TContext>(
     })
     .reduce((result, operationId) => {
       const endpoint: Endpoint = endpoints[operationId];
+
       const type = jsonSchemaTypeToGraphQL(
         operationId,
-        endpoint.response || { type: 'object', properties: {} },
+        endpoint.response &&
+          Object.keys(endpoint.response).length !== 0 &&
+          Object.keys(endpoint.response).includes('type')
+          ? endpoint.response
+          : { type: 'object', properties: {} },
         'response',
         false,
         gqlTypes,
