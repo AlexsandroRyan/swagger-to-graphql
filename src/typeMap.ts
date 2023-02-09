@@ -10,7 +10,6 @@ import {
   GraphQLInputType,
   GraphQLInt,
   GraphQLList,
-  GraphQLNonNull,
   GraphQLObjectType,
   GraphQLOutputType,
   GraphQLScalarType,
@@ -109,9 +108,7 @@ export const jsonSchemaTypeToGraphQL = <IsInputType extends boolean>(
       )} without type and schema`,
     );
   })();
-  return (required
-    ? GraphQLNonNull(baseType)
-    : baseType) as IsInputType extends true
+  return baseType as IsInputType extends true
     ? GraphQLInputType
     : GraphQLOutputType;
 };
@@ -204,31 +201,22 @@ export const createGraphQLType = (
       : jsonSchema.items;
     if (isObjectType(itemsSchema) || isArrayType(itemsSchema)) {
       return new GraphQLList(
-        GraphQLNonNull(
-          createGraphQLType(
-            itemsSchema,
-            `${title}_items`,
-            isInputType,
-            gqlTypes,
-          ),
-        ),
+        createGraphQLType(itemsSchema, `${title}_items`, isInputType, gqlTypes),
       );
     }
 
     if (itemsSchema.type === 'file') {
       // eslint-disable-next-line no-use-before-define,@typescript-eslint/no-use-before-define
       return new GraphQLList(
-        GraphQLNonNull(
-          createGraphQLType(
-            {
-              type: 'object',
-              required: [],
-              properties: { unsupported: { type: 'string' } },
-            },
-            title,
-            isInputType,
-            gqlTypes,
-          ),
+        createGraphQLType(
+          {
+            type: 'object',
+            required: [],
+            properties: { unsupported: { type: 'string' } },
+          },
+          title,
+          isInputType,
+          gqlTypes,
         ),
       );
     }
@@ -236,7 +224,7 @@ export const createGraphQLType = (
       itemsSchema.format,
       itemsSchema.type,
     );
-    return new GraphQLList(GraphQLNonNull(primitiveType));
+    return new GraphQLList(primitiveType);
   }
 
   if (
